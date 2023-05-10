@@ -105,9 +105,40 @@ class AlertComponent extends PickerReact.Component {
   }
 }
 
-PickerReact.render(<AlertComponent name="picker" age='18' />, root);
+// PickerReact.render(<AlertComponent name="picker" age='18' />, root);
 
-setTimeout(() => {
-  PickerReact.render(<AlertComponent name="Christine" age='3' />, root);
-  // PickerReact.render(<Heart title="Picker 666..."/>, root);
-}, 2000)
+// setTimeout(() => {
+//   PickerReact.render(<AlertComponent name="Christine" age='3' />, root);
+//   // PickerReact.render(<Heart title="Picker 666..."/>, root);
+// }, 2000)
+
+
+
+class DemoRef extends PickerReact.Component {
+  constructor(props) {
+    super(props)
+    this.handleClick = this.handleClick.bind(this)
+  }
+  handleClick() {
+    console.log(this.input.value)
+    console.log(this.input)
+    console.log(this.alert)
+  }
+  componentDidMount() {
+    console.log("componentDidMount")
+  }
+  componentWillUnmount() {
+    console.log("componentWillUnmount")
+  }
+  render() {
+    return (
+      <div>
+        <input type="text" ref={input => (this.input = input)} />
+        <button onClick={this.handleClick}>按钮</button>
+        <AlertComponent ref={alert => (this.alert = alert)} name="Picker" age={20} />
+      </div>
+    )
+  }
+}
+
+PickerReact.render(<DemoRef />, root);

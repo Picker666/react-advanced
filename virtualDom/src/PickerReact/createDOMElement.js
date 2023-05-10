@@ -13,13 +13,18 @@ export default function createDOMElement (virtualDOM) {
     updateNodeElement(newElement, virtualDOM)
   }
 
+  newElement._virtualDOM = virtualDOM;
+
   if (children) {
     children.forEach(child => {
       mountElement(child, newElement)
     })
   }
 
-  newElement._virtualDOM = virtualDOM;
+  if (virtualDOM?.props?.ref) {
+    virtualDOM?.props?.ref(newElement)
+  }
+
 
   return newElement;
 }
