@@ -4,7 +4,7 @@ const createElement = (type, props, ...children) => {
       if (typeof child === 'object') {
         result.push(child);
       } else {
-        result.push(createElement('text', { contentText: child }));
+        result.push(createElement('text', { textContent: child }));
       }
     }
     return result;
