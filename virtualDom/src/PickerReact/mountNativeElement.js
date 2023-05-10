@@ -1,8 +1,12 @@
 import createDOMElement from "./createDOMElement";
+import unmountNode from "./unmountNode";
 
-export default function mountNativeElement (virtualDOM, container) {
+export default function mountNativeElement (virtualDOM, container, oldDOM) {
   const newElement = createDOMElement(virtualDOM);
 
+  if (oldDOM) {
+    unmountNode(oldDOM)
+  }
   container.appendChild(newElement);
 
   const {component} = virtualDOM;

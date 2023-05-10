@@ -83,6 +83,18 @@ class AlertComponent extends PickerReact.Component {
     this.setState({title: "new title..."});
   }
 
+  componentWillReceiveProps(nextProps) {
+    console.log('=========componentWillReceiveProps============')
+  }
+
+  componentWillUpdate (nextProps) {
+    console.log('=========componentWillUpdate============')
+  }
+
+  componentDidUpdate (prevProps) {
+    console.log('=========componentDidUpdate============')
+  }
+
   render () {
     return <div>Hello Picker ...{this.props.name}{this.props.age}
       <div>
@@ -94,3 +106,8 @@ class AlertComponent extends PickerReact.Component {
 }
 
 PickerReact.render(<AlertComponent name="picker" age='18' />, root);
+
+setTimeout(() => {
+  PickerReact.render(<AlertComponent name="Christine" age='3' />, root);
+  // PickerReact.render(<Heart title="Picker 666..."/>, root);
+}, 2000)
