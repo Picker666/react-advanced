@@ -1,7 +1,7 @@
 const createElement = (type, props, ...children) => {
-  const newChildren = [...children].reduce((result, child) => {
+  const newChildren = [].concat(...children).reduce((result, child) => {
     if (child !== false && child !== true && child !== null) {
-      if (typeof child === 'object') {
+     if (child instanceof Object) {
         result.push(child);
       } else {
         result.push(createElement('text', { textContent: child }));

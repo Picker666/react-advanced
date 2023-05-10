@@ -29,10 +29,43 @@ function diff (virtualDOM, container, oldDOM) {
       updateNodeElement(oldDOM, virtualDOM, oldVirtualDOM)
     }
 
-    // 子节点diff
-    virtualDOM.children.forEach(function (child, index) {
-      diff(child, oldDOM, oldDOM.childNodes[index])
-    })
+    // 1|将拥有key属性的子元素方到单独的对象中
+    const keyedElements = {};
+    for (let i = 0,len = oldDOM.childNodes.length; i < len;i++) {
+      const domElement = oldDOM.childNodes[i];
+      if (domElement.nodeType === 1) {
+        const key = domElement.getAttribute('key');
+        if (key !== undefined && key !== null) {
+          keyedElements[key] = domElement;
+        }
+      }
+    }
+
+    const hasNoKey = Object.keys(keyedElements).length === 0;
+
+    if (hasNoKey) {
+      // 子节点diff
+      virtualDOM.children.forEach(function (child, index) {
+        diff(child, oldDOM, oldDOM.childNodes[index])
+      })
+    } else {
+      
+      // 2、循环virtualDOM 的子元素，获取key属性
+      virtualDOM.children.forEach((child, i) => {
+        const key = child.props.key;
+        if (key) {
+          const domElement = keyedElements[key]
+
+          if (domElement) {
+            // 3、看看当前位置是不是我们期望的元素
+            if(oldDOM.childNodes[i] && oldDOM.childNodes[i] !== domElement) {
+              oldDOM.insertBefore(domElement, oldDOM.childNodes[i])
+            }
+          }
+        }
+      })
+    }
+
 
     // 删除子节点
     const { childNodes: oldChildNodes } = oldDOM;
