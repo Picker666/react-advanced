@@ -1,3 +1,4 @@
+import updateNodeElement from '../DOM/updateNodeElement';
 import { createTaskQuence, arrified, createStateNode, getTag } from '../Misc';
 
 const taskQuence = createTaskQuence();
@@ -8,7 +9,17 @@ let pendingCommit = null;
 const commitAllWork = fiber => {
 
   fiber.effects.forEach(item => {
-    if (item.effectTag === 'placement') {
+    if (item.effectTag === 'update') {
+
+      if (item.type === item.alternate.type) {
+        // 节点类型相同
+        updateNodeElement(item.stateNode, item, item.alternate)
+      } else {
+        // 节点类型不同
+        item.parent.stateNode.replaceChild(item.stateNode, item.alternate.stateNode)
+      }
+      
+    } else if (item.effectTag === 'placement') {
       let currentFiber = item;
       let parentFiber = item.parent;
       // 不能往类组件节点添加元素，所以找到类组件父级节点
@@ -21,6 +32,11 @@ const commitAllWork = fiber => {
     }
   })
   
+  /**
+   * 备份旧的 fiber  节点对象
+   */
+
+  fiber.stateNode.__rootFiberContainer = fiber;
 }
 
 const getFirstTask = () => {
@@ -35,6 +51,7 @@ const getFirstTask = () => {
     tag: 'host_root',
     effects: [],
     child: null,
+    alternate: task.dom.__rootFiberContainer
   }
 };
 
@@ -47,24 +64,61 @@ const reconcileChildren = (fiber, children) => {
   let newFiber = null;
   let preFiber = null;
 
+  let alternate = null;
+
+  if (fiber.alternate?.child) {
+    alternate = fiber.alternate.child;
+  }
+
   while (index < numberOfElements) {
     element = arrifiedChildren[index];
-    newFiber = {
-      type: element.type,
-      props: element.props,
-      tag: getTag(element),
-      effects: [],
-      effectTag: "placement",
-      parent: fiber,
-    };
 
-    newFiber.stateNode = createStateNode(newFiber);
-    console.log('newFiber: ', newFiber);
+    if (element && alternate) {
+      // 更新
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        tag: getTag(element),
+        effects: [],
+        effectTag: "update",
+        parent: fiber,
+        alternate
+      };
+
+      if (element.type === alternate.type) {
+        // 类型相同
+        newFiber.stateNode = alternate.stateNode;
+      } else {
+        // 类型不同
+        newFiber.stateNode = createStateNode(newFiber);
+      }
+  
+      
+    } else if (element && !alternate) {
+      // 初始化
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        tag: getTag(element),
+        effects: [],
+        effectTag: "placement",
+        parent: fiber,
+      };
+  
+      newFiber.stateNode = createStateNode(newFiber);
+    }
+
 
     if (index === 0) {
       fiber.child = newFiber;
     } else {
       preFiber.sibilng = newFiber;
+    }
+
+    if (alternate?.sibilng) {
+      alternate = alternate.sibilng;
+    } else {
+      alternate = null;
     }
 
     preFiber = newFiber;
@@ -73,6 +127,8 @@ const reconcileChildren = (fiber, children) => {
 }
 
 const executeTask = (fiber) => {
+  // 执行的fiber都是同级的
+
   if (fiber.tag === 'class_component') {
     reconcileChildren(fiber, fiber.stateNode.render());
   } else if (fiber.tag === 'function_component') {

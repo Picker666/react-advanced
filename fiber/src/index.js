@@ -7,7 +7,16 @@ const jsx = <div>
   <p>Hello Fiber</p>
 </div>
 
-// render(jsx, root);
+render(jsx, root);
+
+setTimeout(() => {
+  const jsx = <div>
+    <div>Hi React</div>
+    <p>Hi Fiber</p>
+  </div>;
+
+  render(jsx, root);
+}, 2000);
 
 class Greating extends Component {
   constructor(props) {
@@ -25,4 +34,4 @@ function FnComponent (props) {
   return <div>Hello Function component...{props.title}</div>
 };
 
-render(<FnComponent title="Hi"/>, root);
+// render(<FnComponent title="Hi"/>, root);

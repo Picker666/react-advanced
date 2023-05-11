@@ -112,8 +112,11 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 var root = document.getElementById('root');
 var jsx = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hello React"), /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hello Fiber"));
-
-// render(jsx, root);
+Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])(jsx, root);
+setTimeout(function () {
+  var jsx = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "Hi React"), /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hi Fiber"));
+  Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])(jsx, root);
+}, 2000);
 var Greating = /*#__PURE__*/function (_Component) {
   _inherits(Greating, _Component);
   var _super = _createSuper(Greating);
@@ -133,9 +136,8 @@ function FnComponent(props) {
   return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "Hello Function component...", props.title);
 }
 ;
-Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])( /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement(FnComponent, {
-  title: "Hi"
-}), root);
+
+// render(<FnComponent title="Hi"/>, root);
 
 /***/ }),
 
@@ -273,6 +275,16 @@ function updateNodeElement(newElement, virtualDOM, oldVirtualDOM) {
       props: {}
     },
     oldProps = _ref2.props;
+  if (virtualDOM.type === 'text') {
+    if (props.textContent !== oldProps.TextContent) {
+      if (virtualDOM.parent.type !== oldVirtualDOM.parent.type) {
+        virtualDOM.parent.stateNode.appendChild(document.createTextNode(props.textContent));
+      } else {
+        virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode);
+      }
+    }
+    return;
+  }
   Object.keys(props).forEach(function (propName) {
     var newPropValue = props[propName];
     var oldPropValue = oldProps[propName];
@@ -490,14 +502,24 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
-/* harmony import */ var _Misc__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Misc */ "./src/react/Misc/index.js");
+/* harmony import */ var _DOM_updateNodeElement__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../DOM/updateNodeElement */ "./src/react/DOM/updateNodeElement.js");
+/* harmony import */ var _Misc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../Misc */ "./src/react/Misc/index.js");
 
-var taskQuence = Object(_Misc__WEBPACK_IMPORTED_MODULE_0__["createTaskQuence"])();
+
+var taskQuence = Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["createTaskQuence"])();
 var subTask = null;
 var pendingCommit = null;
 var commitAllWork = function commitAllWork(fiber) {
   fiber.effects.forEach(function (item) {
-    if (item.effectTag === 'placement') {
+    if (item.effectTag === 'update') {
+      if (item.type === item.alternate.type) {
+        // 节点类型相同
+        Object(_DOM_updateNodeElement__WEBPACK_IMPORTED_MODULE_0__["default"])(item.stateNode, item, item.alternate);
+      } else {
+        // 节点类型不同
+        item.parent.stateNode.replaceChild(item.stateNode, item.alternate.stateNode);
+      }
+    } else if (item.effectTag === 'placement') {
       var currentFiber = item;
       var parentFiber = item.parent;
       // 不能往类组件节点添加元素，所以找到类组件父级节点
@@ -509,6 +531,12 @@ var commitAllWork = function commitAllWork(fiber) {
       }
     }
   });
+
+  /**
+   * 备份旧的 fiber  节点对象
+   */
+
+  fiber.stateNode.__rootFiberContainer = fiber;
 };
 var getFirstTask = function getFirstTask() {
   /**
@@ -521,39 +549,73 @@ var getFirstTask = function getFirstTask() {
     stateNode: task.dom,
     tag: 'host_root',
     effects: [],
-    child: null
+    child: null,
+    alternate: task.dom.__rootFiberContainer
   };
 };
 var reconcileChildren = function reconcileChildren(fiber, children) {
+  var _fiber$alternate;
   // children 可能是对象也可能实数组，将对象类型的children 变成数组
-  var arrifiedChildren = Object(_Misc__WEBPACK_IMPORTED_MODULE_0__["arrified"])(children);
+  var arrifiedChildren = Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["arrified"])(children);
   var index = 0;
   var numberOfElements = arrifiedChildren.length;
   var element = null;
   var newFiber = null;
   var preFiber = null;
+  var alternate = null;
+  if ((_fiber$alternate = fiber.alternate) !== null && _fiber$alternate !== void 0 && _fiber$alternate.child) {
+    alternate = fiber.alternate.child;
+  }
   while (index < numberOfElements) {
+    var _alternate;
     element = arrifiedChildren[index];
-    newFiber = {
-      type: element.type,
-      props: element.props,
-      tag: Object(_Misc__WEBPACK_IMPORTED_MODULE_0__["getTag"])(element),
-      effects: [],
-      effectTag: "placement",
-      parent: fiber
-    };
-    newFiber.stateNode = Object(_Misc__WEBPACK_IMPORTED_MODULE_0__["createStateNode"])(newFiber);
-    console.log('newFiber: ', newFiber);
+    if (element && alternate) {
+      // 更新
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        tag: Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["getTag"])(element),
+        effects: [],
+        effectTag: "update",
+        parent: fiber,
+        alternate: alternate
+      };
+      if (element.type === alternate.type) {
+        // 类型相同
+        newFiber.stateNode = alternate.stateNode;
+      } else {
+        // 类型不同
+        newFiber.stateNode = Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["createStateNode"])(newFiber);
+      }
+    } else if (element && !alternate) {
+      // 初始化
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        tag: Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["getTag"])(element),
+        effects: [],
+        effectTag: "placement",
+        parent: fiber
+      };
+      newFiber.stateNode = Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["createStateNode"])(newFiber);
+    }
     if (index === 0) {
       fiber.child = newFiber;
     } else {
       preFiber.sibilng = newFiber;
+    }
+    if ((_alternate = alternate) !== null && _alternate !== void 0 && _alternate.sibilng) {
+      alternate = alternate.sibilng;
+    } else {
+      alternate = null;
     }
     preFiber = newFiber;
     index++;
   }
 };
 var executeTask = function executeTask(fiber) {
+  // 执行的fiber都是同级的
+
   if (fiber.tag === 'class_component') {
     reconcileChildren(fiber, fiber.stateNode.render());
   } else if (fiber.tag === 'function_component') {
