@@ -15,8 +15,14 @@ class Greating extends Component {
   }
 
   render () {
-    return <div>Hello World......</div>
+    return <div>Hello World......{ this.props.title}</div>
   }
 }
 
-render(<Greating />, root);
+// render(<Greating title="Hi" />, root);
+
+function FnComponent (props) {
+  return <div>Hello Function component...{props.title}</div>
+};
+
+render(<FnComponent title="Hi"/>, root);

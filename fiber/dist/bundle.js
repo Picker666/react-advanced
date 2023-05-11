@@ -124,12 +124,18 @@ var Greating = /*#__PURE__*/function (_Component) {
   _createClass(Greating, [{
     key: "render",
     value: function render() {
-      return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "Hello World......");
+      return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "Hello World......", this.props.title);
     }
   }]);
   return Greating;
-}(_react__WEBPACK_IMPORTED_MODULE_0__["Component"]);
-Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])( /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement(Greating, null), root);
+}(_react__WEBPACK_IMPORTED_MODULE_0__["Component"]); // render(<Greating title="Hi" />, root);
+function FnComponent(props) {
+  return /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "Hello Function component...", props.title);
+}
+;
+Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])( /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement(FnComponent, {
+  title: "Hi"
+}), root);
 
 /***/ }),
 
@@ -495,7 +501,7 @@ var commitAllWork = function commitAllWork(fiber) {
       var currentFiber = item;
       var parentFiber = item.parent;
       // 不能往类组件节点添加元素，所以找到类组件父级节点
-      while (parentFiber.tag === 'class_component') {
+      while (parentFiber.tag === 'class_component' || parentFiber.tag === 'function_component') {
         parentFiber = parentFiber.parent;
       }
       if (currentFiber.tag === 'host_component') {
@@ -550,6 +556,8 @@ var reconcileChildren = function reconcileChildren(fiber, children) {
 var executeTask = function executeTask(fiber) {
   if (fiber.tag === 'class_component') {
     reconcileChildren(fiber, fiber.stateNode.render());
+  } else if (fiber.tag === 'function_component') {
+    reconcileChildren(fiber, fiber.stateNode(fiber.props));
   } else {
     reconcileChildren(fiber, fiber.props.children);
   }

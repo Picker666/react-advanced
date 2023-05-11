@@ -12,7 +12,7 @@ const commitAllWork = fiber => {
       let currentFiber = item;
       let parentFiber = item.parent;
       // 不能往类组件节点添加元素，所以找到类组件父级节点
-      while (parentFiber.tag === 'class_component') {
+      while (parentFiber.tag === 'class_component' || parentFiber.tag === 'function_component') {
         parentFiber = parentFiber.parent;
       }
       if (currentFiber.tag === 'host_component') {
@@ -75,6 +75,8 @@ const reconcileChildren = (fiber, children) => {
 const executeTask = (fiber) => {
   if (fiber.tag === 'class_component') {
     reconcileChildren(fiber, fiber.stateNode.render());
+  } else if (fiber.tag === 'function_component') {
+    reconcileChildren(fiber, fiber.stateNode(fiber.props));
   } else {
     reconcileChildren(fiber, fiber.props.children);
   }
