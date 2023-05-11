@@ -19,7 +19,7 @@ export default function unmountNode (node) {
     virtualDOM.props.ref(null);
   }
 
-  // 4、时间属性
+  // 4、事件属性
   Object.keys(virtualDOM.props).forEach(propName => {
     if (propName.slice(0,2) === 'on') {
       const eventName = propName.toLowerCase().slice(2);
@@ -32,6 +32,7 @@ export default function unmountNode (node) {
   if(node.childNodes.length > 0) {
     for(let i = 0; i < node.childNodes.length; i++) {
       unmountNode(node.childNodes[i]);
+      // 删除之后node.childNodes.length 长度减少
       i--;
     }
   }
