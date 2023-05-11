@@ -277,12 +277,15 @@ function updateNodeElement(newElement, virtualDOM, oldVirtualDOM) {
     oldProps = _ref2.props;
   if (virtualDOM.type === 'text') {
     if (props.textContent !== oldProps.TextContent) {
-      if (virtualDOM.parent.type !== oldVirtualDOM.parent.type) {
-        virtualDOM.parent.stateNode.appendChild(document.createTextNode(props.textContent));
-      } else {
-        virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode);
-      }
+      virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode);
+
+      // if(virtualDOM.parent.type !== oldVirtualDOM.parent.type) {
+      //   virtualDOM.parent.stateNode.appendChild(document.createTextNode(props.textContent));
+      // } else {
+      //   virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode)
+      // }
     }
+
     return;
   }
   Object.keys(props).forEach(function (propName) {
@@ -590,6 +593,11 @@ var reconcileChildren = function reconcileChildren(fiber, children) {
         newFiber.stateNode = alternate.stateNode;
       } else {
         // 类型不同
+        // newFiber.stateNode = createStateNode(newFiber);
+        alternate.effectTag = 'delete';
+        fiber.effects.push(alternate);
+        newFiber.effectTag = 'placement';
+        fiber.effects.push(newFiber);
         newFiber.stateNode = Object(_Misc__WEBPACK_IMPORTED_MODULE_1__["createStateNode"])(newFiber);
       }
     } else if (element && !alternate) {

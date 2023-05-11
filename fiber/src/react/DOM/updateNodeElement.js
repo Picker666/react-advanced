@@ -5,12 +5,13 @@ export default function updateNodeElement (newElement, virtualDOM, oldVirtualDOM
 
   if (virtualDOM.type === 'text') {
     if (props.textContent !== oldProps.TextContent) {
+      virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode)
 
-      if(virtualDOM.parent.type !== oldVirtualDOM.parent.type) {
-        virtualDOM.parent.stateNode.appendChild(document.createTextNode(props.textContent));
-      } else {
-        virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode)
-      }
+      // if(virtualDOM.parent.type !== oldVirtualDOM.parent.type) {
+      //   virtualDOM.parent.stateNode.appendChild(document.createTextNode(props.textContent));
+      // } else {
+      //   virtualDOM.parent.stateNode.replaceChild(document.createTextNode(props.textContent), oldVirtualDOM.stateNode)
+      // }
     }
 
     return;

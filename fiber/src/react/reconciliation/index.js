@@ -95,10 +95,15 @@ const reconcileChildren = (fiber, children) => {
         newFiber.stateNode = alternate.stateNode;
       } else {
         // 类型不同
+        // newFiber.stateNode = createStateNode(newFiber);
+        alternate.effectTag = 'delete';
+        fiber.effects.push(alternate);
+
+        newFiber.effectTag = 'placement';
+        fiber.effects.push(newFiber);
         newFiber.stateNode = createStateNode(newFiber);
       }
   
-      
     } else if (element && !alternate) {
       // 初始化
       newFiber = {
