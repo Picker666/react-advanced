@@ -183,7 +183,7 @@ class KeyDemo extends PickerReact.Component {
           {this.state.persons.map(person => (
             <li key={person.id}>
               {person.name}
-              {/* <DemoRef /> */}
+              <DemoRef />
             </li>
           ))}
         </ul>

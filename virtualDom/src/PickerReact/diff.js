@@ -79,9 +79,9 @@ function diff (virtualDOM, container, oldDOM) {
       } else {
         for (let i = 0; i < oldChildNodes.length; i++) {
           const oldChild = oldDOM.children[i];
-          const key = oldChild._virtualDOM.key;
+          const key = oldChild._virtualDOM.props.key;
 
-          const found = virtualDOM.children.some(child => child.key === key);
+          const found = virtualDOM.children.some(child => child.props.key === key);
           if (!found) {
             unmountNode(oldChild);
           }
