@@ -4,7 +4,7 @@ export default function updateNodeElement (newElement, virtualDOM, oldVirtualDOM
   const { props: oldProps } = oldVirtualDOM || { props: {} };
 
   if (virtualDOM.type === 'text') {
-    if (props.textContent !== oldProps.TextContent) {
+    if (props.textContent !== oldProps.textContent) {
 
       if(virtualDOM.parent.type !== oldVirtualDOM.parent.type) {
         virtualDOM.parent.stateNode.appendChild(document.createTextNode(props.textContent));

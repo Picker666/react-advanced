@@ -1,5 +1,5 @@
 import updateNodeElement from '../DOM/updateNodeElement';
-import { createTaskQuence, arrified, createStateNode, getTag } from '../Misc';
+import { createTaskQuence, arrified, createStateNode, getTag, getRoot } from '../Misc';
 
 const taskQuence = createTaskQuence();
 let subTask = null;
@@ -9,6 +9,10 @@ let pendingCommit = null;
 const commitAllWork = fiber => {
 
   fiber.effects.forEach(item => {
+    if (item.tag === 'class_component') {
+      item.stateNode.__fiber = item;
+    }
+
     if (item.effectTag === 'delete') {
       item.parent.stateNode.removeChild(item.stateNode);
     } else if (item.effectTag === 'update') {
@@ -46,6 +50,21 @@ const getFirstTask = () => {
    * 从任务队列获取任务
    */
   const task = taskQuence.pop();
+
+  if (task.from === 'class_component') {
+    const root = getRoot(task.instance);
+
+    task.instance.__fiber.partialState = task.partialState;
+
+    return { 
+    props: root.props,
+    stateNode: root.stateNode,
+    tag: 'host_root',
+    effects: [],
+    child: null,
+    alternate: root
+  };
+  }
   // 返回最外层节点的fiber对象
   return { 
     props: task.props,
@@ -97,7 +116,6 @@ const reconcileChildren = (fiber, children) => {
         // 类型不同
         newFiber.stateNode = createStateNode(newFiber);
       }
-  
       
     } else if (element && !alternate) {
       // 初始化
@@ -135,6 +153,12 @@ const executeTask = (fiber) => {
   // 执行的fiber都是同级的
 
   if (fiber.tag === 'class_component') {
+    if (fiber.stateNode?.__fiber?.partialState) {
+      fiber.stateNode.state = {
+        ...fiber.stateNode.state,
+        ...fiber.stateNode?.__fiber?.partialState
+      }
+    }
     reconcileChildren(fiber, fiber.stateNode.render());
   } else if (fiber.tag === 'function_component') {
     reconcileChildren(fiber, fiber.stateNode(fiber.props));
@@ -205,4 +229,14 @@ export const render = (element, dom) => {
   })
 
   requestIdleCallback(performTask)
+}
+
+export const scheduleUpdate = (instance, partialState) => {
+  taskQuence.push({
+    from: 'class_component',
+    instance,
+    partialState
+  });
+
+  requestIdleCallback(performTask);
 }
