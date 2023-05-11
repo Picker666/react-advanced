@@ -61,6 +61,8 @@ function diff (virtualDOM, container, oldDOM) {
             if(oldDOM.childNodes[i] && oldDOM.childNodes[i] !== domElement) {
               oldDOM.insertBefore(domElement, oldDOM.childNodes[i])
             }
+          } else {
+            mountElement(child, oldDOM, oldDOM.childNodes[i]);
           }
         }
       })
