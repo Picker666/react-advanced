@@ -72,8 +72,20 @@ function diff (virtualDOM, container, oldDOM) {
     // 删除子节点
     const { childNodes: oldChildNodes } = oldDOM;
     if (oldChildNodes.length > virtualDOM.children.length) {
-      for (let i = oldChildNodes.length - 1; i > virtualDOM.children.length - 1; i--) {
-        unmountNode(oldChildNodes[i]);
+      if (hasNoKey) {
+        for (let i = oldChildNodes.length - 1; i > virtualDOM.children.length - 1; i--) {
+          unmountNode(oldChildNodes[i]);
+        }
+      } else {
+        for (let i = 0; i < oldChildNodes.length; i++) {
+          const oldChild = oldDOM.children[i];
+          const key = oldChild._virtualDOM.key;
+
+          const found = virtualDOM.children.some(child => child.key === key);
+          if (!found) {
+            unmountNode(oldChild);
+          }
+        }
       }
     }
 
