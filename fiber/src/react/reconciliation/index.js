@@ -3,6 +3,18 @@ import { createTaskQuence, arrified, createStateNode, getTag } from '../Misc';
 const taskQuence = createTaskQuence();
 let subTask = null;
 
+let pendingCommit = null;
+
+const commitAllWork = fiber => {
+  console.log('fiber: ', fiber.effects);
+  fiber.effects.forEach(item => {
+    if (item.effectTag === 'placement') {
+      item.parent.stateNode.appendChild(item.stateNode);
+    }
+  })
+  
+}
+
 const getFirstTask = () => {
   /**
    * 从任务队列获取任务
@@ -70,8 +82,7 @@ const executeTask = (fiber) => {
     currentExcutelyFiber = currentExcutelyFiber.parent;
   }
 
-  
-  console.log('fiber: ', fiber);
+  pendingCommit = currentExcutelyFiber;
 }
 
 const workLoop = (deadline) => {
@@ -86,6 +97,10 @@ const workLoop = (deadline) => {
   while (subTask && deadline.timeRemaining() > 1) {
     // 执行任务，并接受任务，返回新任务
     subTask = executeTask(subTask);
+  }
+
+  if (pendingCommit) {
+    commitAllWork(pendingCommit);
   }
 }
 

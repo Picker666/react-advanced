@@ -398,6 +398,15 @@ __webpack_require__.r(__webpack_exports__);
 
 var taskQuence = Object(_Misc__WEBPACK_IMPORTED_MODULE_0__["createTaskQuence"])();
 var subTask = null;
+var pendingCommit = null;
+var commitAllWork = function commitAllWork(fiber) {
+  console.log('fiber: ', fiber.effects);
+  fiber.effects.forEach(function (item) {
+    if (item.effectTag === 'placement') {
+      item.parent.stateNode.appendChild(item.stateNode);
+    }
+  });
+};
 var getFirstTask = function getFirstTask() {
   /**
    * 从任务队列获取任务
@@ -453,7 +462,7 @@ var executeTask = function executeTask(fiber) {
     }
     currentExcutelyFiber = currentExcutelyFiber.parent;
   }
-  console.log('fiber: ', fiber);
+  pendingCommit = currentExcutelyFiber;
 };
 var workLoop = function workLoop(deadline) {
   // 执行任务
@@ -467,6 +476,9 @@ var workLoop = function workLoop(deadline) {
   while (subTask && deadline.timeRemaining() > 1) {
     // 执行任务，并接受任务，返回新任务
     subTask = executeTask(subTask);
+  }
+  if (pendingCommit) {
+    commitAllWork(pendingCommit);
   }
 };
 var performTask = function performTask(deadline) {
