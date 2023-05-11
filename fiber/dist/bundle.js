@@ -114,7 +114,7 @@ var root = document.getElementById('root');
 var jsx = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hello React"), /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hello Fiber"));
 Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])(jsx, root);
 setTimeout(function () {
-  var jsx = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, "Hi React"), /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hi Fiber"));
+  var jsx = /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("div", null, /*#__PURE__*/_react__WEBPACK_IMPORTED_MODULE_0__["default"].createElement("p", null, "Hi Fiber"));
   Object(_react__WEBPACK_IMPORTED_MODULE_0__["render"])(jsx, root);
 }, 2000);
 var Greating = /*#__PURE__*/function (_Component) {
@@ -511,7 +511,9 @@ var subTask = null;
 var pendingCommit = null;
 var commitAllWork = function commitAllWork(fiber) {
   fiber.effects.forEach(function (item) {
-    if (item.effectTag === 'update') {
+    if (item.effectTag === 'delete') {
+      item.parent.stateNode.removeChild(item.stateNode);
+    } else if (item.effectTag === 'update') {
       if (item.type === item.alternate.type) {
         // 节点类型相同
         Object(_DOM_updateNodeElement__WEBPACK_IMPORTED_MODULE_0__["default"])(item.stateNode, item, item.alternate);
@@ -566,10 +568,13 @@ var reconcileChildren = function reconcileChildren(fiber, children) {
   if ((_fiber$alternate = fiber.alternate) !== null && _fiber$alternate !== void 0 && _fiber$alternate.child) {
     alternate = fiber.alternate.child;
   }
-  while (index < numberOfElements) {
+  while (index < numberOfElements || alternate) {
     var _alternate;
     element = arrifiedChildren[index];
-    if (element && alternate) {
+    if (!element && alternate) {
+      alternate.effectTag = 'delete';
+      fiber.effects.push(alternate);
+    } else if (element && alternate) {
       // 更新
       newFiber = {
         type: element.type,
@@ -601,7 +606,7 @@ var reconcileChildren = function reconcileChildren(fiber, children) {
     }
     if (index === 0) {
       fiber.child = newFiber;
-    } else {
+    } else if (element) {
       preFiber.sibilng = newFiber;
     }
     if ((_alternate = alternate) !== null && _alternate !== void 0 && _alternate.sibilng) {
