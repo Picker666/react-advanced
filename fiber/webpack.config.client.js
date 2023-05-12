@@ -1,6 +1,8 @@
 const path = require('path');
+const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin');
+const swp = new SpeedMeasureWebpackPlugin();
 
-module.exports = {
+module.exports = swp.wrap({
   // target: "web",
   mode: "development",
   entry: './src/index.js',
@@ -20,4 +22,4 @@ module.exports = {
       }
     ]
   },
-}
+})
