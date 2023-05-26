@@ -1,4 +1,4 @@
-import render from '../index.jsx';
+import render from '../index';
 
 let states = [];
 let setters = [];
@@ -6,9 +6,11 @@ let currentIndex = 0;
 
 const generateSetter = (index) => (newState) => {
 	if (typeof newState === 'function') {
-
+		states[index] = newState(states[index]);
+	} else {
+		states[index] = newState;
 	}
-	states[index] = typeof newState === 'function' ? newState(states[index]) : newState;
+
 	currentIndex = 0;
 	render();
 }
@@ -16,7 +18,11 @@ const generateSetter = (index) => (newState) => {
 
 const useState = (initialState) =>{
 	if (states[currentIndex] === undefined) {
-		states[currentIndex] = typeof initialState === 'function' ? initialState() : initialState;
+		if (typeof initialState === 'function') {
+			states[currentIndex] = initialState();
+		} else {
+			states[currentIndex] = initialState;
+		}
 	}
 
 	const setter = generateSetter(currentIndex);
