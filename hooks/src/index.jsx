@@ -3,8 +3,9 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-const render = () => {
+const render = (callback) => {
     root.render(<App/>);
+    callback && callback();
 };
 
 render();

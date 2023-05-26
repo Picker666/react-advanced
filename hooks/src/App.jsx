@@ -1,4 +1,4 @@
-import StateTesting from './example/StateTesting.jsx';
+import StateTesting from './example/Testing.jsx';
 
 const App = () => {
     return (
