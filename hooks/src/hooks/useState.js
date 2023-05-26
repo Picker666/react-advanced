@@ -5,25 +5,28 @@ let setters = [];
 let currentIndex = 0;
 
 const generateSetter = (index) => (newState) => {
-    states[index] = newState;
-    currentIndex = 0;
-    render();
+	if (typeof newState === 'function') {
+
+	}
+	states[index] = typeof newState === 'function' ? newState(states[index]) : newState;
+	currentIndex = 0;
+	render();
 }
 
 
 const useState = (initialState) =>{
-    if (states[currentIndex] === undefined) {
-        states[currentIndex] = initialState;
-    }
+	if (states[currentIndex] === undefined) {
+		states[currentIndex] = typeof initialState === 'function' ? initialState() : initialState;
+	}
 
-    const setter = generateSetter(currentIndex);
+	const setter = generateSetter(currentIndex);
 
-    setters[currentIndex] = setter
-    const value = states[currentIndex];
+	setters[currentIndex] = setter;
+	const value = states[currentIndex];
 
-    currentIndex ++;
+	currentIndex ++;
 
-    return [value, setter];
+	return [value, setter];
 }
 
 export default useState;
