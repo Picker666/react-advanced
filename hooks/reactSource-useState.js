@@ -156,3 +156,7 @@ HooksDispatcherOnMountInDEV: {
     }
 }
 // ```
+
+
+scheduleUpdateOnFiber 21834
+

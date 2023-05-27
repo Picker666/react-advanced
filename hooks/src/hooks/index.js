@@ -5,10 +5,6 @@ const previousStates = {
 }
 
 const update = () => {
-	callbackReturnCB.forEach(cb => {
-		cb && cb();
-	});
-
 	render(() => {
 		statesIndex = 0;
 		previousStates.current = states.slice();
@@ -56,13 +52,12 @@ let previousDependencies=[];
 let effectIndex = 0;
 let callbackReturnCB = [];
 
-const returnCBFunc = (dependencies, cb) => {
-	if (cb) {
-		return () => {
-			console.log('dependencies: ', dependencies);
-			cb();
-		}
-	}
+const handleEffect = (callback) => {
+	const returnCBFunc = callbackReturnCB[effectIndex];
+	if (callbackReturnCB[effectIndex]) {
+		returnCBFunc()
+	};
+	callbackReturnCB[effectIndex] = callback();
 }
 
 const useEffect = (callback, dependencies) => {
@@ -74,14 +69,12 @@ const useEffect = (callback, dependencies) => {
   }
 
   if (dependencies === undefined) {
-		const cb = callback();
-		callbackReturnCB[effectIndex] = returnCBFunc(dependencies, cb);
+		handleEffect( callback);
   } else if (dependencies.length) {
 		const preDep = previousDependencies[effectIndex];
 		const haveChanged = preDep?.some((dep, i) => dependencies[i] !== dep);
 		if (!preDep || haveChanged) {
-			const cb = callback();
-			callbackReturnCB[effectIndex] = returnCBFunc(dependencies, cb);
+			handleEffect(callback);
 		}
   }
 
