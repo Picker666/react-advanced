@@ -1,7 +1,7 @@
 // import { useState, useEffect } from 'react';
 import { useState, useEffect } from '../hooks';
 
-const StateTesting = () => {
+const EffectTesting = () => {
 	const [count, setCount] = useState(0);
 	const [name, setName] = useState('Picker');
 	const [value, setValue] = useState(() => count + 1);
@@ -39,6 +39,7 @@ const StateTesting = () => {
 	}, [name]);
 
 	return <div>
+		<h1>EffectTesting</h1>
 		<div>
 				<button onClick={() => setCount(count + 1)}>count</button>: {count}
 		</div>
@@ -54,4 +55,4 @@ const StateTesting = () => {
 	</div>
 }
 
-export default StateTesting;
+export default EffectTesting;
