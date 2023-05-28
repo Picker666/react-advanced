@@ -5,6 +5,8 @@ import StateTesting from './example/StateTesting.jsx';
 import EffectTesting from './example/EffectTesting.jsx';
 import ReducerTesting from './example/ReducerTesting.jsx';
 
+import { OverallState } from './components';
+
 const config = [
   {
     label: 'useState',
@@ -12,7 +14,9 @@ const config = [
     label: 'useEffect',
   }, {
     label: 'useReducer',
-  }
+  }, {
+		label: 'overallState'
+	}
 ];
 
 const ComponentController = ({comp}) => {
@@ -22,6 +26,8 @@ const ComponentController = ({comp}) => {
 		return <EffectTesting />
 	} else if (comp === 'useReducer') {
 		return <ReducerTesting />
+	} else if (comp === 'overallState') {
+		return <OverallState />
 	}
 	return null;
 }
