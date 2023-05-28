@@ -82,7 +82,32 @@ const useEffect = (callback, dependencies) => {
 	effectIndex ++;
 }
 
+// =================================================================useReducer
+let reducerState = null;
+const useReducer = (handler, initialState) => {
+	if (reducerState === null) {
+		reducerState = initialState;
+	}
+
+	const dispatch = (action) => {
+		if (action instanceof Object) {
+			if (typeof action.type !== 'string') {
+				throw new Error('type 必须为string...')
+			}
+
+			const newState = handler(reducerState, action);
+			if (reducerState !== newState) {
+				reducerState = newState;
+				update();
+			}
+		}
+	}
+
+	return [reducerState, dispatch]
+}
+
 export {
   useState,
-	useEffect
+	useEffect,
+	useReducer
 };
